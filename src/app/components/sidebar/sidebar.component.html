@@ -1,15 +1,28 @@
 <div class="card overflow-hidden">
-  <div class="card-body pt-3">
+  <div class="card-body pt-3" *ngIf="!loading; else loadingBlock">
+    <h5 class="card-title mb-3 text-primary">Quotes of the day</h5>
     <ul class="nav nav-link-secondary flex-column fw-bold gap-2">
-      <li class="nav-item"><a class="nav-link text-dark" href="#">Home</a></li>
-      <li class="nav-item"><a class="nav-link" href="#">Explore</a></li>
-      <li class="nav-item"><a class="nav-link" href="#">Feed</a></li>
-      <li class="nav-item"><a class="nav-link" href="#">Terms</a></li>
-      <li class="nav-item"><a class="nav-link" href="#">Support</a></li>
-      <li class="nav-item"><a class="nav-link" href="#">Settings</a></li>
+      <li class="nav-item d-flex justify-content-between" *ngFor="let quote of quotes; let i = index">
+        <span class="flex-grow-1">
+          <div>{{ quote.quote }}</div>
+          <small class="text-muted d-block mt-1">— {{ quote.author }}</small>
+        </span>
+        <div class="d-flex flex-column align-items-center ms-2">
+          <button class="btn btn-link p-0" (click)="toggleFavorite(quote)">
+            <i class="bi" [ngClass]="isFavorite(quote) ? 'bi-heart-fill text-danger' : 'bi-heart'"></i>
+          </button>
+          <button class="btn btn-link p-0 mt-1" (click)="replaceQuote(i)">
+            <i class="bi bi-x-circle text-secondary"></i>
+          </button>
+        </div>
+      </li>
     </ul>
   </div>
-  <div class="card-footer text-center py-2">
-    <a class="btn btn-link btn-sm" href="#">View Profile</a>
-  </div>
+
+  <ng-template #loadingBlock>
+    <div class="text-center p-4">
+      <div class="spinner-border text-primary" role="status"></div>
+      <div class="mt-2 text-muted">Loading quotes...</div>
+    </div>
+  </ng-template>
 </div>

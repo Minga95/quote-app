@@ -1,0 +1,20 @@
+
+
+  <div class="card mt-2">
+    <div class="px-3 pt-4 pb-2">
+      <div class="d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center">
+          <div>
+            <h5 class="card-title mb-0"><a>{{post?.text}}</a></h5>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <p class="fs-6 fw-light text-muted">{{post?.author}}</p>
+      <div class="mt-3">
+        <button (click)="copyToClipboard(post!)" class="btn btn-primary btn-sm">Copy Comment</button>
+      </div>
+    </div>
+  </div>
+
