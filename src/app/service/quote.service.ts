@@ -1,24 +1,19 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Quote } from '../interface/Quote';
-
+import { environment } from '../../environments/environments';
 
 @Injectable({
   providedIn: 'root'
 })
 export class QuoteService {
 
-  private apiUrl = 'https://api.api-ninjas.com/v1/quotes';
-
-  private headers = new HttpHeaders({
-    'X-Api-Key': '8ZcasIh6JcoSTHz+xEg+DQ==xI5y61lRhspCq6Dl'
-  });
+  private apiUrl = environment.apiUrl + environment.quote;
 
   constructor(private http: HttpClient) { }
 
-
   getQuotes(): Observable<Quote[]> {
-    return this.http.get<Quote[]>(this.apiUrl, { headers: this.headers });
+    return this.http.get<Quote[]>(this.apiUrl);
   }
 }

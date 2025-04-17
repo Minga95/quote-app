@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Post } from 'src/app/interface/post';
 import { SearchService } from 'src/app/service/search.service';
+import { PostService } from 'src/app/service/post.service'; // Importa PostService
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
 
@@ -16,7 +17,11 @@ export class FeedComponent implements OnInit, OnDestroy {
   filteredPosts: Post[] = [];
   searchSub!: Subscription;
 
-  constructor(private fb: FormBuilder, private searchService: SearchService) {
+  constructor(
+    private fb: FormBuilder,
+    private searchService: SearchService,
+    private postService: PostService
+  ) {
     this.postForm = this.fb.group({
       text: ['', Validators.required],
       author: [''],
@@ -24,12 +29,21 @@ export class FeedComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    this.postService.getPosts().subscribe({
+      next: (posts) => {
+        this.postArray = posts;
+        this.filteredPosts = this.applyFilter(this.searchService.currentSearch);
+      },
+      error: (err) => {
+        console.error('Errore nel caricamento dei post:', err);
+      },
+    });
+
     this.searchSub = this.searchService.search$
       .pipe(debounceTime(300), distinctUntilChanged())
       .subscribe((search) => {
         this.filteredPosts = this.applyFilter(search);
       });
-    this.addExamplePost();
   }
 
   ngOnDestroy() {
@@ -48,9 +62,16 @@ export class FeedComponent implements OnInit, OnDestroy {
       timestamp: new Date(),
     };
 
-    this.postArray = [post, ...this.postArray];
-    this.filteredPosts = this.applyFilter(this.searchService.currentSearch);
-    this.postForm.reset();
+    this.postService.addPost(post).subscribe({
+      next: (savedPost: Post) => {
+        this.postArray = [savedPost, ...this.postArray];
+        this.filteredPosts = this.applyFilter(this.searchService.currentSearch);
+        this.postForm.reset();
+      },
+      error: (err) => {
+        console.error("Errore nell'aggiunta del post:", err);
+      },
+    });
   }
 
   applyFilter(search: string): Post[] {
@@ -61,15 +82,5 @@ export class FeedComponent implements OnInit, OnDestroy {
       const combined = `${post.text} ${post.author ?? ''}`.toLowerCase();
       return keywords.some((kw) => combined.includes(kw));
     });
-  }
-
-  addExamplePost() {
-    const post: Post = {
-      text: 'Two gust is megl che uan',
-      author: 'Albert Einstein',
-      timestamp: new Date(),
-    };
-    this.postArray.push(post);
-    this.filteredPosts = [...this.postArray];
   }
 }
