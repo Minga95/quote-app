@@ -1,12 +1,12 @@
 <div class="card mb-4">
   <div class="card-header">
-    <h5>New Idea</h5>
+    <h5>New Quote</h5>
   </div>
   <div class="card-body">
     <form [formGroup]="postForm" (ngSubmit)="addPost()">
       <div class="mb-3">
         <textarea formControlName="text" rows="3" class="form-control"
-          placeholder="Write a quote or idea..."></textarea>
+          placeholder="Write a quote..."></textarea>
       </div>
       <div class="mb-3">
         <input formControlName="author" class="form-control" placeholder="Author (optional)" />

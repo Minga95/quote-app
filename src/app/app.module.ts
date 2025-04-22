@@ -10,7 +10,11 @@ import { SidebarComponent } from './components/sidebar/sidebar.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { PostCardComponent } from './components/post-card/post-card.component';
 import { ScrollingModule } from '@angular/cdk/scrolling';
-import { HttpClientModule } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
+import { HttpErrorInterceptor } from './interceptors/http-error.interceptor';
+import { AlertComponent } from './utils/alert/alert.component';
+import { HomePageComponent } from './components/homePage/homePage.component';
+import { NotFoundPageComponent } from './components/notFoundPage/notFoundPage.component';
 
 @NgModule({
   declarations: [
@@ -20,7 +24,9 @@ import { HttpClientModule } from '@angular/common/http';
     NavbarComponent,
     SearchComponent,
     PostCardComponent,
-
+    AlertComponent,
+    HomePageComponent,
+    NotFoundPageComponent
 
   ],
   imports: [
@@ -31,7 +37,13 @@ import { HttpClientModule } from '@angular/common/http';
     ScrollingModule,
     HttpClientModule
   ],
-  providers: [],
+  providers: [
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: HttpErrorInterceptor,
+      multi: true
+    }
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

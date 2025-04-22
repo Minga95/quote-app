@@ -1,6 +1,12 @@
 <div class="card overflow-hidden">
   <div class="card-body pt-3" *ngIf="!loading; else loadingBlock">
-    <h5 class="card-title mb-3 text-primary">Quotes of the day</h5>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="card-title text-primary mb-0">Quotes of the day</h5>
+      <button class="btn btn-sm btn-outline-primary" (click)="loadQuotes()" title="Ricarica citazioni">
+        <i class="bi bi-arrow-clockwise"></i>
+      </button>
+    </div>
+
     <ul class="nav nav-link-secondary flex-column fw-bold gap-2">
       <li class="nav-item d-flex justify-content-between" *ngFor="let quote of quotes; let i = index">
         <span class="flex-grow-1">
@@ -8,7 +14,12 @@
           <small class="text-muted d-block mt-1">— {{ quote.author }}</small>
         </span>
         <div class="d-flex flex-column align-items-center ms-2">
-          <button class="btn btn-link p-0" (click)="toggleFavorite(quote)">
+          <button
+            class="btn btn-link p-0"
+            (click)="toggleFavorite(quote)"
+            [disabled]="isFavorite(quote)"
+            title="Aggiungi ai preferiti"
+          >
             <i class="bi" [ngClass]="isFavorite(quote) ? 'bi-heart-fill text-danger' : 'bi-heart'"></i>
           </button>
           <button class="btn btn-link p-0 mt-1" (click)="replaceQuote(i)">

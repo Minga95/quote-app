@@ -1,24 +1,33 @@
 import { Component, OnInit } from '@angular/core';
 import { Quote } from 'src/app/interface/Quote';
+import { Post } from 'src/app/interface/post';
 import { QuoteService } from 'src/app/service/quote.service';
+import { PostService } from 'src/app/service/post.service';
 
 @Component({
   selector: 'app-sidebar',
   templateUrl: './sidebar.component.html',
-  styleUrls: ['./sidebar.component.css']
+  styleUrls: ['./sidebar.component.css'],
 })
 export class SidebarComponent implements OnInit {
-
   quotes: Quote[] = [];
   favorites: Quote[] = [];
   loading = true;
   loadedCount = 0;
 
-  constructor(private quoteService: QuoteService) {}
+  constructor(
+    private quoteService: QuoteService,
+    private postService: PostService
+  ) {}
 
   ngOnInit(): void {
-    const storedFavorites = localStorage.getItem('favorites');
-    this.favorites = storedFavorites ? JSON.parse(storedFavorites) : [];
+    this.loadQuotes();
+  }
+
+  loadQuotes(): void {
+    this.quotes = [];
+    this.loading = true;
+    this.loadedCount = 0;
 
     for (let i = 0; i < 5; i++) {
       this.quoteService.getQuotes().subscribe({
@@ -29,7 +38,7 @@ export class SidebarComponent implements OnInit {
         error: (err) => {
           console.error(`Errore nella chiamata #${i + 1}:`, err);
           this.checkIfFinished();
-        }
+        },
       });
     }
   }
@@ -42,22 +51,22 @@ export class SidebarComponent implements OnInit {
   }
 
   toggleFavorite(quote: Quote): void {
-    const index = this.favorites.findIndex(
-      q => q.quote === quote.quote && q.author === quote.author
-    );
+    if (this.isFavorite(quote)) return;
 
-    if (index > -1) {
-      this.favorites.splice(index, 1);
-    } else {
-      this.favorites.push(quote);
-    }
+    const trimmedAuthor = quote.author?.trim() || 'Anonymous';
+    const post: Post = {
+      text: quote.quote,
+      author: trimmedAuthor,
+      timestamp: new Date(),
+    };
 
-    localStorage.setItem('favorites', JSON.stringify(this.favorites));
+    this.favorites.push(quote);
+    this.postService.addPost(post);
   }
 
   isFavorite(quote: Quote): boolean {
     return this.favorites.some(
-      q => q.quote === quote.quote && q.author === quote.author
+      (q) => q.quote === quote.quote && q.author === quote.author
     );
   }
 
@@ -70,7 +79,7 @@ export class SidebarComponent implements OnInit {
       },
       error: (err) => {
         console.error('Errore nel rimpiazzo della citazione:', err);
-      }
+      },
     });
   }
 }
