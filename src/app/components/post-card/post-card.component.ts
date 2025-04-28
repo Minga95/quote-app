@@ -1,5 +1,7 @@
-import { Component, Input, OnInit } from '@angular/core';
+
+import { Component, inject, Input, OnInit } from '@angular/core';
 import { Post } from 'src/app/interface/post';
+import { PostService } from 'src/app/service/post.service';
 
 @Component({
   selector: 'app-post-card',
@@ -10,6 +12,8 @@ export class PostCardComponent implements OnInit {
 
 
   @Input() post: Post | undefined
+
+   private postService = inject(PostService);
 
   constructor() { }
 
@@ -26,5 +30,11 @@ export class PostCardComponent implements OnInit {
       console.error('Errore nella copia:', err);
     });
   }
+
+  deletePost(post: Post){
+    this.postService.deletePost(post);
+  }
+
+
 
 }

@@ -17,6 +17,7 @@ export class FeedComponent implements OnInit, OnDestroy {
   filteredPosts: Post[] = [];
   searchSub!: Subscription;
   postSub!: Subscription;
+  postDelSub!: Subscription;
 
   constructor(
     private fb: FormBuilder,
@@ -45,12 +46,14 @@ export class FeedComponent implements OnInit, OnDestroy {
       this.postArray = [newPost, ...this.postArray];
       this.filteredPosts = this.applyFilter(this.searchService.currentSearch);
     });
+
+    this.postDelSub = this.postService.postDeleted$.subscribe((deletedId) => {
+      this.postArray = this.postArray.filter(p => p.id !== deletedId);
+      this.filteredPosts = this.applyFilter(this.searchService.currentSearch);
+    });
+
   }
 
-  ngOnDestroy() {
-    this.searchSub?.unsubscribe();
-    this.postSub?.unsubscribe();
-  }
 
   addPost() {
     if (this.postForm.invalid) return;
@@ -74,4 +77,12 @@ export class FeedComponent implements OnInit, OnDestroy {
       return keywords.some((kw) => combined.includes(kw));
     });
   }
+
+  ngOnDestroy() {
+    this.searchSub?.unsubscribe();
+    this.postSub?.unsubscribe();
+    this.postDelSub?.unsubscribe();
+  }
+
+
 }

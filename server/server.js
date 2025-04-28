@@ -4,8 +4,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const { Client } = require("pg");
-
-const axios = require('axios')
+const axios = require("axios");
 
 const app = express();
 
@@ -24,15 +23,14 @@ const API_KEY = process.env.API_KEY;
 
 client
   .connect()
-  .then(() => console.log("Connesso al database PostgreSQL"))
-  .catch((err) => console.error("Errore nella connessione al DB:", err.stack));
+  .then(() => console.log("Connected to PostgreSQL database"))
+  .catch((err) => console.error("Database connection error:", err.stack));
+
 
 app.get("/quote", async (req, res) => {
   try {
     const response = await axios.get("https://api.api-ninjas.com/v1/quotes", {
-      headers: {
-        "X-Api-Key": API_KEY,
-      },
+      headers: { "X-Api-Key": API_KEY },
     });
     res.json(response.data);
   } catch (error) {
@@ -41,6 +39,7 @@ app.get("/quote", async (req, res) => {
   }
 });
 
+
 app.get("/post", async (req, res) => {
   try {
     const result = await client.query(
@@ -48,16 +47,17 @@ app.get("/post", async (req, res) => {
     );
     res.json(result.rows);
   } catch (error) {
-    console.error("Errore nel recupero dei post:", error);
-    res.status(500).send("Errore nel recupero dei post");
+    console.error("Error fetching posts:", error);
+    res.status(500).send("Error fetching posts");
   }
 });
+
 
 app.post("/post", async (req, res) => {
   const { text, author } = req.body;
 
   if (!text || !author) {
-    return res.status(400).send('Campi "text" e "author" sono obbligatori');
+    return res.status(400).send('"text" and "author" fields are required');
   }
 
   try {
@@ -67,12 +67,60 @@ app.post("/post", async (req, res) => {
     );
     res.status(201).json(result.rows[0]);
   } catch (error) {
-    console.error("Errore nell'aggiunta del post:", error);
-    res.status(500).send("Errore nell'aggiunta del post");
+    console.error("Error creating post:", error);
+    res.status(500).send("Error creating post");
   }
 });
 
+
+app.put("/post/:id", async (req, res) => {
+  const { id } = req.params;
+  const { text, author } = req.body;
+
+  if (!text || !author) {
+    return res.status(400).send('"text" and "author" fields are required');
+  }
+
+  try {
+    const result = await client.query(
+      "UPDATE posts SET text = $1, author = $2, timestamp = CURRENT_TIMESTAMP WHERE id = $3 RETURNING *",
+      [text, author, id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).send("Post not found");
+    }
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error("Error updating post:", error);
+    res.status(500).send("Error updating post");
+  }
+});
+
+
+app.delete("/post/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const result = await client.query(
+      "DELETE FROM posts WHERE id = $1 RETURNING *",
+      [id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).send("Post not found");
+    }
+
+    res.json({ message: "Post successfully deleted", post: result.rows[0] });
+  } catch (error) {
+    console.error("Error deleting post:", error);
+    res.status(500).send("Error deleting post");
+  }
+});
+
+
 const port = 3000;
 app.listen(port, () => {
-  console.log(`Server in ascolto su http://localhost:${port}`);
+  console.log(`Server listening on http://localhost:${port}`);
 });
